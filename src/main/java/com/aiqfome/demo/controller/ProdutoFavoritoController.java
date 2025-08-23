@@ -2,7 +2,6 @@ package com.aiqfome.demo.controller;
 
 import com.aiqfome.demo.domain.Cliente;
 import com.aiqfome.demo.domain.ProdutoFavorito;
-import com.aiqfome.demo.dto.ClienteDTO;
 import com.aiqfome.demo.dto.ErrorDTO;
 import com.aiqfome.demo.dto.ProdutoFavoritoDTO;
 import com.aiqfome.demo.exception.BusinessException;
@@ -27,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import javax.swing.text.html.Option;
+import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Optional;
 
@@ -143,6 +144,11 @@ public class ProdutoFavoritoController {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ProdutoFavoritoDTO.class))
                     ),
                     @ApiResponse(
+                            responseCode = "404",
+                            description = "Produto Favorito não encontrado",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorDTO.class))
+                    ),
+                    @ApiResponse(
                             responseCode = "400",
                             description = "Dados inválidos, confira a requisição",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorDTO.class))
@@ -157,15 +163,20 @@ public class ProdutoFavoritoController {
     @PutMapping
     public ResponseEntity<?> atualizarProdutoFavorito(@RequestBody @Valid ProdutoFavoritoDTO dto) {
         try {
-            ProdutoFavorito produtoFavorito = ProdutoFavorito.builder()
-                    .id(dto.getId())
-                    .review(dto.getReview())
-                    .cliente(Cliente.builder().id(dto.getClienteId()).build())
-                    .build();
+            Optional<ProdutoFavorito> optionalProdutoFavorito = produtoFavoritoRepository.findByIdAndClienteId(dto.getId(), dto.getClienteId());
+
+            if (optionalProdutoFavorito.isEmpty()) {
+                throw new InvalidParameterException("Não foi encontrado um produto favorito com os parâmetros informados: " + dto.getId() + " - clienteId: " + dto.getClienteId());
+            }
+
+            ProdutoFavorito produtoFavorito = optionalProdutoFavorito.get();
+            produtoFavorito.setReview(dto.getReview());
 
             produtoFavoritoRepository.save(produtoFavorito);
 
             return ResponseEntity.ok().body(dto);
+        } catch (InvalidParameterException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDTO(ex.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(new ErrorDTO(e.getMessage()));
         }

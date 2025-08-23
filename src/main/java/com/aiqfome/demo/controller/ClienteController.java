@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/clientes")
@@ -101,6 +103,11 @@ public class ClienteController {
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ClienteDTO.class))
                     ),
                     @ApiResponse(
+                            responseCode = "404",
+                            description = "Cliente não encontrado",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorDTO.class))
+                    ),
+                    @ApiResponse(
                             responseCode = "400",
                             description = "Dados inválidos, confira a requisição",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorDTO.class))
@@ -120,16 +127,23 @@ public class ClienteController {
                     .body(new ErrorDTO("ID do cliente não fornecido para atualização"));
 
         try {
-            Cliente cliente = Cliente.builder()
-                    .id(dto.getId())
-                    .nome(dto.getNome())
-                    .email(dto.getEmail())
-                    .build();
+            Optional<Cliente> optionalCliente = clienteRepository.findById(dto.getId());
+
+            if(optionalCliente.isEmpty()) {
+                throw new InvalidParameterException("Nenhum cliente encontrado para o parâmetro informado");
+            }
+
+            Cliente cliente = optionalCliente.get();
+            cliente.setEmail(dto.getEmail());
+            cliente.setNome(dto.getNome());
 
             clienteRepository.save(cliente);
 
             return ResponseEntity.ok().body(dto);
-        } catch (Exception e) {
+        } catch (InvalidParameterException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDTO(ex.getMessage()));
+        }
+        catch (Exception e) {
             return ResponseEntity.internalServerError().body(new ErrorDTO(e.getMessage()));
         }
     }
