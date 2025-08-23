@@ -91,9 +91,10 @@ public class ProdutoFavoritoController {
                     .review(dto.getReview())
                     .cliente(Cliente.builder().id(dto.getClienteId()).build())
                     .build();
+
             produtoFavoritoRepository.save(produtoFavorito);
 
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok().body(dto);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(new ErrorDTO(e.getMessage()));
         }
