@@ -5,6 +5,7 @@ import com.aiqfome.demo.domain.ProdutoFavorito;
 import com.aiqfome.demo.dto.ErrorDTO;
 import com.aiqfome.demo.dto.ProdutoFavoritoDTO;
 import com.aiqfome.demo.exception.BusinessException;
+import com.aiqfome.demo.persistence.IClienteRepository;
 import com.aiqfome.demo.persistence.IProdutoFavoritoRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import javax.swing.text.html.Option;
 import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +37,7 @@ import java.util.Optional;
 public class ProdutoFavoritoController {
 
     private final IProdutoFavoritoRepository produtoFavoritoRepository;
+    private final IClienteRepository clienteRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Operation(
@@ -121,15 +122,23 @@ public class ProdutoFavoritoController {
                 throw new BusinessException("Produto: " + dto.getId() + " já foi marcado como favorito");
             }
 
+            Optional<Cliente> optionalCliente = clienteRepository.findById(dto.getClienteId());
+
+            if (optionalCliente.isEmpty()) {
+                throw new InvalidParameterException("Cliente com id: " + dto.getClienteId() + " não foi encontrado");
+            }
+
             ProdutoFavorito produtoFavorito = ProdutoFavorito.builder()
                     .id(dto.getId())
                     .review(dto.getReview())
-                    .cliente(Cliente.builder().id(dto.getClienteId()).build())
+                    .cliente(optionalCliente.get())
                     .build();
 
             produtoFavoritoRepository.save(produtoFavorito);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+        } catch (InvalidParameterException e) {
+            return ResponseEntity.badRequest().body(new ErrorDTO(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(new ErrorDTO(e.getMessage()));
         }
