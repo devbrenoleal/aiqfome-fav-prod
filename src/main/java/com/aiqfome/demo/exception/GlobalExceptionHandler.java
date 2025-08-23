@@ -3,6 +3,7 @@ package com.aiqfome.demo.exception;
 import com.aiqfome.demo.dto.ErrorDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -20,5 +21,12 @@ public class GlobalExceptionHandler {
                 .toList();
 
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorDTO> handleMissingParams(MissingServletRequestParameterException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorDTO(String.format("Parâmetro obrigatório '%s' não foi fornecido", ex.getParameterName())));
     }
 }
