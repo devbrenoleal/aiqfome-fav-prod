@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,9 +30,11 @@ public class ProdutoFavorito implements Serializable {
     @Column(nullable = false, updatable = false, length = 36)
     private String id;
 
+    @NotBlank(message = "ID do produto é obrigatório")
     @Column(nullable = false)
     private Long produtoId;
 
+    @NotBlank(message = "Título é obrigatório")
     @Column(nullable = false)
     private String titulo;
 
