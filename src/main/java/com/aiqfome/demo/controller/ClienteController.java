@@ -4,9 +4,14 @@ import com.aiqfome.demo.domain.Cliente;
 import com.aiqfome.demo.dto.ClienteDTO;
 import com.aiqfome.demo.dto.ErrorDTO;
 import com.aiqfome.demo.persistence.IClienteRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,11 +30,47 @@ public class ClienteController {
 
     private final IClienteRepository clienteRepository;
 
+    @Operation(
+            summary = "Lista os clientes",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Retornou a lista com sucesso",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ClienteDTO.class))
+                    )
+            }
+    )
     @GetMapping
-    public ResponseEntity<List<Cliente>> getClientes() {
-        return ResponseEntity.ok().body(clienteRepository.findAll());
+    public ResponseEntity<List<ClienteDTO>> getClientes() {
+        return ResponseEntity.ok()
+                .body(
+                        clienteRepository.findAll()
+                                .stream()
+                                .map(c -> new ClienteDTO(c.getId(), c.getNome(), c.getEmail()))
+                                .toList()
+                );
     }
 
+    @Operation(
+            summary = "Cria novos clientes com nome e e-mail",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "201",
+                            description = "Criou o cliente com sucesso",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ClienteDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Dados inválidos, confira a requisição",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Erro no processamento dos dados",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorDTO.class))
+                    )
+            }
+    )
     @PostMapping
     public ResponseEntity<?> criarCliente(@RequestBody @Valid ClienteDTO dto) {
         if(dto.getId() != null)
@@ -51,6 +92,26 @@ public class ClienteController {
         }
     }
 
+    @Operation(
+            summary = "Atualiza o cliente",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Atualizou com sucesso o cliente",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ClienteDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Dados inválidos, confira a requisição",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Erro no processamento dos dados",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorDTO.class))
+                    )
+            }
+    )
     @PutMapping
     public ResponseEntity<?> atualizarCliente(@RequestBody @Valid ClienteDTO dto) {
         if(dto.getId() == null)
@@ -73,6 +134,25 @@ public class ClienteController {
         }
     }
 
+    @Operation(
+            summary = "Exclui o cliente",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "Excluiu o cliente com sucesso"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Dados inválidos, confira a requisição",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Erro no processamento dos dados",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorDTO.class))
+                    )
+            }
+    )
     @DeleteMapping
     public ResponseEntity<?> excluirCliente(@RequestBody ClienteDTO dto) {
         if(dto.getId() == null)
