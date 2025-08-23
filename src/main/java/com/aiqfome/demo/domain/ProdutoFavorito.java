@@ -7,11 +7,13 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Entity
 @Getter @Setter
@@ -34,4 +36,9 @@ public class ProdutoFavorito implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(nullable = false, foreignKey = @ForeignKey(name = "PRODUTO_FAVORITO_CLIENTE_ID"))
     private Cliente cliente;
+
+    @PrePersist
+    public void prePersist() {
+        id = UUID.randomUUID().toString().toLowerCase();
+    }
 }
