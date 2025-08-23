@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,19 +31,16 @@ public class ProdutoFavorito implements Serializable {
     @Column(nullable = false, updatable = false, length = 36)
     private String id;
 
-    @NotBlank(message = "ID do produto é obrigatório")
+    @NotNull(message = "ID do produto é obrigatório")
     @Column(nullable = false)
     private Long produtoId;
-
-    @NotBlank(message = "Título é obrigatório")
-    @Column(nullable = false)
-    private String titulo;
 
     @Column
     private String review;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(nullable = false, foreignKey = @ForeignKey(name = "PRODUTO_FAVORITO_CLIENTE_ID"))
+    @NotNull(message = "ID do cliente é obrigatório")
     private Cliente cliente;
 
     @PrePersist
