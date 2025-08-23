@@ -4,7 +4,9 @@ services:
     container_name: aiqfome_backend
     ports:
       - "8080:8080"
+      - "5005:5005"
     environment:
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/aiqfome_db
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
