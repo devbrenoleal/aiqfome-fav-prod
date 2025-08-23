@@ -7,9 +7,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +16,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 @Entity
 @Getter @Setter @Builder
@@ -29,11 +26,8 @@ public class ProdutoFavorito implements Serializable {
 
     @Id
     @Column(nullable = false, updatable = false, length = 36)
-    private String id;
-
     @NotNull(message = "ID do produto é obrigatório")
-    @Column(nullable = false)
-    private Long produtoId;
+    private Long id;
 
     @Column
     private String review;
@@ -42,9 +36,4 @@ public class ProdutoFavorito implements Serializable {
     @JoinColumn(nullable = false, foreignKey = @ForeignKey(name = "PRODUTO_FAVORITO_CLIENTE_ID"))
     @NotNull(message = "ID do cliente é obrigatório")
     private Cliente cliente;
-
-    @PrePersist
-    public void prePersist() {
-        id = UUID.randomUUID().toString().toLowerCase();
-    }
 }

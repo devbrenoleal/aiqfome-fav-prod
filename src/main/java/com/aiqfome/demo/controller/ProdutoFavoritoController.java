@@ -1,5 +1,6 @@
 package com.aiqfome.demo.controller;
 
+import com.aiqfome.demo.domain.Cliente;
 import com.aiqfome.demo.domain.ProdutoFavorito;
 import com.aiqfome.demo.dto.ErrorDTO;
 import com.aiqfome.demo.dto.ProdutoFavoritoDTO;
@@ -38,12 +39,12 @@ public class ProdutoFavoritoController {
                     .stream()
                     .map(produtoFavorito -> {
                         Optional<ProdutoFavoritoDTO> dtoOptional = Optional.ofNullable(restTemplate.getForObject(
-                                "https://fakestoreapi.com/products/" + produtoFavorito.getProdutoId(),
+                                "https://fakestoreapi.com/products/" + produtoFavorito.getId(),
                                 ProdutoFavoritoDTO.class
                         ));
 
                         if(dtoOptional.isEmpty()) {
-                            throw new BusinessException("Erro ao buscar produto: " + produtoFavorito.getProdutoId());
+                            throw new BusinessException("Erro ao buscar produto: " + produtoFavorito.getId());
                         }
                         ProdutoFavoritoDTO produtoFavoritoDTO = dtoOptional.get();
 
@@ -60,47 +61,48 @@ public class ProdutoFavoritoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> criarProdutoFavorito(@RequestBody @Valid ProdutoFavorito produtoFavorito) {
-        if(produtoFavorito.getId() != null)
-            return ResponseEntity
-                    .badRequest()
-                    .body(new ErrorDTO("Não é permitido criar um produto favorito fornecendo parâmetro ID"));
+    public ResponseEntity<?> marcarProdutoComoFavorito(@RequestBody @Valid ProdutoFavoritoDTO dto) {
         try {
-            Optional<ProdutoFavorito> produtoJaMarcado = produtoFavoritoRepository.findByProdutoId(produtoFavorito.getProdutoId());
+            Optional<ProdutoFavorito> produtoJaMarcado = produtoFavoritoRepository.findById(dto.getId());
 
             if(produtoJaMarcado.isPresent()) {
-                throw new BusinessException("Produto: " + produtoFavorito.getProdutoId() + " já foi marcado como favorito");
+                throw new BusinessException("Produto: " + dto.getId() + " já foi marcado como favorito");
             }
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(produtoFavoritoRepository.save(produtoFavorito));
+            ProdutoFavorito produtoFavorito = ProdutoFavorito.builder()
+                    .id(dto.getId())
+                    .review(dto.getReview())
+                    .cliente(Cliente.builder().id(dto.getClienteId()).build())
+                    .build();
+
+            produtoFavoritoRepository.save(produtoFavorito);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(dto);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(new ErrorDTO(e.getMessage()));
         }
     }
 
     @PutMapping
-    public ResponseEntity<?> atualizarProdutoFavorito(@RequestBody @Valid ProdutoFavorito produtoFavorito) {
-        if(produtoFavorito.getId() == null)
-            return ResponseEntity
-                    .badRequest()
-                    .body(new ErrorDTO("ID do produto favorito não fornecido para atualização"));
-
+    public ResponseEntity<?> atualizarProdutoFavorito(@RequestBody @Valid ProdutoFavoritoDTO dto) {
         try {
-            return ResponseEntity.ok().body(produtoFavoritoRepository.save(produtoFavorito));
+            ProdutoFavorito produtoFavorito = ProdutoFavorito.builder()
+                    .id(dto.getId())
+                    .review(dto.getReview())
+                    .cliente(Cliente.builder().id(dto.getClienteId()).build())
+                    .build();
+            produtoFavoritoRepository.save(produtoFavorito);
+
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(new ErrorDTO(e.getMessage()));
         }
     }
 
     @DeleteMapping
-    public ResponseEntity<?> excluirProdutoFavorito(@RequestBody ProdutoFavorito produtoFavorito) {
-        if(produtoFavorito.getId() == null)
-            return ResponseEntity
-                    .badRequest()
-                    .body(new ErrorDTO("ID do produto favorito não fornecido para exclusão"));
-
+    public ResponseEntity<?> excluirProdutoFavorito(@RequestBody @Valid ProdutoFavoritoDTO dto) {
         try {
-            produtoFavoritoRepository.delete(produtoFavorito);
+            produtoFavoritoRepository.deleteByIdAndClienteId(dto.getId(), dto.getClienteId());
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(new ErrorDTO(e.getMessage()));
