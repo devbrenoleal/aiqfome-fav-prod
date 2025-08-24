@@ -9,8 +9,21 @@ Pontos sobre o projeto:
 - Em ProdutoFavoritoController, não há um endpoint base, como /api/produtos-favoritos que liste todos os produtos
   favoritos do banco. Esta decisão foi proposital, pois, não vi razão para listar produtos favoritos que não pertençam a um cliente.
 - Testes unitários não foram implementados devido ao tempo e escopo do projeto, mas seria um bom follow-up
-- Quanto a autenticação e autorização, fiquei confuso quanto a parte que dizia: `A API deve ser pública, mas conter autenticação e autorização.`
-  Para cobrir este cenário, decidi deixar as APIs de listagem públicas, e as APIs que manipulam dados, protegidas.
+
+A stack escolhida foi devido a comodidade, Java e Spring são ferramentas que já trabalho há muito tempo e tenho
+muita familiaridade com elas.
+
+O projeto possui uma divisão simples de arquivos, nenhuma arquitetura específica foi adotada, porém, as boas práticas
+de SOLID foram exercitadas na medida do possível.
+
+- `config` possui algumas configurações essenciais para a segurança da API funcionar corretamente
+- `controller` guarda as classes com os endpoints de acesso ao sistema
+- `domain` estão as classes de reflexo do banco de dados. Optei por utilizar uma abordagem ORM
+- `dto` possuem classes de auxílio para recebimento e retorno de requests
+- `exception` exceções específicas do sistema
+- `persistence` camada de repositórios do banco de dados
+- `security` classes utilitárias para autenticação, autorização e geração de token
+- `service` serviços do sistema
 
 Para fácil execução do projeto, criei um arquivo `docker-compose.yml` já com os containers do Spring e do PostgreSQL
 
