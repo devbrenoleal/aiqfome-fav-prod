@@ -5,10 +5,32 @@ Desafio técnico de uma API para gerenciar os produtos favoritos dos usuários d
 Para organizar a execução das tarefas, utilizei as Issues do Github e separei em Milestones as etapas que eu iria executar
 Cada Milestone possui Issues dentro, e na descrição de cada Issue, existem passos mais detalhados sobre a execução.
 
-Pontos sobre o projeto:
+# Pontos sobre o projeto:
+
 - Em ProdutoFavoritoController, não há um endpoint base, como /api/produtos-favoritos que liste todos os produtos
   favoritos do banco. Esta decisão foi proposital, pois, não vi razão para listar produtos favoritos que não pertençam a um cliente.
 - Testes unitários não foram implementados devido ao tempo e escopo do projeto, mas seria um bom follow-up
+
+# Sobre as APIs
+
+Os endpoints estão protegidas por um filtro do Spring Security, dentro da classe `AuthFilter` ao implementar o
+`OncePerRequestFilter`, portanto, para conseguir utilizar os outros enpoints, é necessário primeiro criar um usuário
+a partir da rota `/api/auth/registrar` enviando um payload contendo `nome, email e senha`.
+Esta rota retornará no header AUTHORIZATION o Bearer token. É necessário colocar esse header em toda request realizada
+
+O token foi configurado para durar 5 horas, e não há politica de invalidação de token (fora do escopo).
+
+Para login com o usuário já criado, a fim de testes, use a rota `/api/auth/login` enviando email e senha.
+
+# Possíveis melhorias
+
+- A proteção CSRF foi desabilitada, pois, configurá-la é complexo e leva tempo. Em uma aplicação real, se faz necessária.
+- Ao listar os produtos favoritos, o sistema faz uma request para a API fornecida para recuperar informações do produto, quero deixar claro
+  que sei que isso não é uma boa prática, e foi feito apenas para facilitar o escopo do projeto.
+- A implementação de um endpoint para `refresh` do token é útil e serviria para impedir o fluxo de trabalho do usuário caso
+  o tempo do token chegue ao final.
+
+# Detalhes de arquitetura
 
 A stack escolhida foi devido a comodidade, Java e Spring são ferramentas que já trabalho há muito tempo e tenho
 muita familiaridade com elas.
@@ -24,6 +46,8 @@ de SOLID foram exercitadas na medida do possível.
 - `persistence` camada de repositórios do banco de dados
 - `security` classes utilitárias para autenticação, autorização e geração de token
 - `service` serviços do sistema
+
+# Como rodar o projeto
 
 Para fácil execução do projeto, criei um arquivo `docker-compose.yml` já com os containers do Spring e do PostgreSQL
 
