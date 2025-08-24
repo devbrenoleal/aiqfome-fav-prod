@@ -18,4 +18,6 @@ public class ClienteDTO implements Serializable {
 
     @NotBlank(message = "Email é obrigatório")
     private String email;
+
+    private String senha;
 }

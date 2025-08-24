@@ -44,6 +44,10 @@ public class Cliente implements Serializable {
     @Column(nullable = false)
     private String email;
 
+    @Column(nullable = false)
+    @NotBlank(message = "Senha é obrigatório")
+    private String senha;
+
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<ProdutoFavorito> produtoFavoritos = new ArrayList<>();
