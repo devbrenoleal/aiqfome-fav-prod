@@ -2,7 +2,8 @@
 
 Desafio técnico de uma API para gerenciar os produtos favoritos dos usuários da plataforma
 
-Para organizar a execução das tarefas, utilizei as Issues do Github e separei em Milestones as etapas que eu iria executar
+Para organizar a execução das tarefas, utilizei as Issues do Github e separei em Milestones as etapas que eu iria executar.
+
 Cada Milestone possui Issues dentro, e na descrição de cada Issue, existem passos mais detalhados sobre a execução.
 
 # Pontos sobre o projeto:
